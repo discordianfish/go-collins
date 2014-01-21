@@ -27,21 +27,23 @@ type Status struct {
 // incomplete
 type Asset struct {
 	Status
-	Data struct {
-		Asset struct {
-			ID     int    `json:"ID"`
-			Tag    string `json:"TAG"`
-			State  AssetState
-			Status string `json:"STATUS"`
-			Type   string `json:"TYPE"`
-		} `json:"ASSET"`
-		Attributes map[string]map[string]string `json:"ATTRIBS"`
-		IPMI       struct {
-			Address  string `json:"IPMI_ADDRESS"`
-			Username string `json:"IPMI_USERNAME"`
-			Password string `json:"IPMI_PASSWORD"`
-		} `json:"IPMI"`
-	} `json:"data"`
+	Data AssetDetails `json:"data"`
+}
+
+type AssetDetails struct {
+	Asset struct {
+		ID     int    `json:"ID"`
+		Tag    string `json:"TAG"`
+		State  AssetState
+		Status string `json:"STATUS"`
+		Type   string `json:"TYPE"`
+	} `json:"ASSET"`
+	Attributes map[string]map[string]string `json:"ATTRIBS"`
+	IPMI       struct {
+		Address  string `json:"IPMI_ADDRESS"`
+		Username string `json:"IPMI_USERNAME"`
+		Password string `json:"IPMI_PASSWORD"`
+	} `json:"IPMI"`
 }
 
 type AssetAddress struct {
@@ -53,10 +55,17 @@ type AssetAddress struct {
 }
 
 type AssetAddresses struct {
-	Status string `json:"status"`
-	Data   struct {
+	Status
+	Data struct {
 		Addresses []AssetAddress
 	}
+}
+
+type Assets struct {
+	Status
+	Data struct {
+		Data []AssetDetails `json:"data"`
+	} `json:"Data"`
 }
 
 type Client struct {
@@ -68,6 +77,7 @@ type Client struct {
 
 func New(user, password, url string) *Client {
 	return &Client{
+		client:   &http.Client{},
 		user:     user,
 		password: password,
 		url:      url,
@@ -125,6 +135,15 @@ func (c *Client) GetAsset(tag string) (*Asset, error) {
 	}
 	asset := &Asset{}
 	return asset, json.Unmarshal(body, &asset)
+}
+
+func (c *Client) FindAllAssets() (*Assets, error) {
+	body, err := c.Request("GET", "/assets", nil)
+	if err != nil {
+		return nil, err
+	}
+	assets := &Assets{}
+	return assets, json.Unmarshal(body, &assets)
 }
 
 func (c *Client) AddAssetLog(tag, mtype, message string) error {
