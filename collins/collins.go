@@ -138,7 +138,11 @@ func (c *Client) GetAsset(tag string) (*Asset, error) {
 }
 
 func (c *Client) FindAllAssets() (*Assets, error) {
-	body, err := c.Request("GET", "/assets", nil)
+	return c.FindAssets(nil)
+}
+
+func (c *Client) FindAssets(params *url.Values) (*Assets, error) {
+	body, err := c.Request("GET", "/assets", params)
 	if err != nil {
 		return nil, err
 	}
