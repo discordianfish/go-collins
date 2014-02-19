@@ -44,6 +44,7 @@ type AssetDetails struct {
 		Username string `json:"IPMI_USERNAME"`
 		Password string `json:"IPMI_PASSWORD"`
 	} `json:"IPMI"`
+	Addresses []AssetAddress `json:"ADDRESSES"`
 }
 
 type AssetAddress struct {
