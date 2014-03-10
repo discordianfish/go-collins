@@ -32,11 +32,14 @@ type Asset struct {
 
 type AssetDetails struct {
 	Asset struct {
-		ID     int    `json:"ID"`
-		Tag    string `json:"TAG"`
-		State  AssetState
-		Status string `json:"STATUS"`
-		Type   string `json:"TYPE"`
+		ID      int    `json:"ID"`
+		Tag     string `json:"TAG"`
+		State   AssetState
+		Status  string `json:"STATUS"`
+		Type    string `json:"TYPE"`
+		Updated string `json:"UPDATED"`
+		Created string `json:"CREATED"`
+		Deleted string `json:"DELETED"`
 	} `json:"ASSET"`
 	Attributes map[string]map[string]string `json:"ATTRIBS"`
 	IPMI       struct {
