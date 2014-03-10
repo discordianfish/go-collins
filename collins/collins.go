@@ -137,6 +137,9 @@ func (c *Client) GetAsset(tag string) (*Asset, error) {
 	if err != nil {
 		return nil, err
 	}
+	if body == nil {
+		return nil, nil
+	}
 	asset := &Asset{}
 	return asset, json.Unmarshal(body, &asset)
 }
