@@ -9,6 +9,10 @@ import (
 	"net/url"
 )
 
+const (
+	defaultMaxSize = "500"
+)
+
 type AssetState struct {
 	ID     int `json:"ID"`
 	Status struct {
@@ -89,6 +93,12 @@ func New(user, password, url string) *Client {
 }
 
 func (c *Client) Request(method string, path string, params *url.Values) ([]byte, error) {
+	if params == nil {
+		params = &url.Values{}
+	}
+	if params.Get("size") == "" {
+		params.Set("size", defaultMaxSize)
+	}
 	url := c.url + path
 	if params != nil {
 		url = url + "?" + params.Encode()
