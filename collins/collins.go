@@ -34,17 +34,24 @@ type Asset struct {
 	Data AssetDetails `json:"data"`
 }
 
+type AssetFlat struct {
+	Status
+	Data AssetCommon `json:"data"`
+}
+
+type AssetCommon struct {
+	ID      int    `json:"ID"`
+	Tag     string `json:"TAG"`
+	State   AssetState
+	Status  string `json:"STATUS"`
+	Type    string `json:"TYPE"`
+	Updated string `json:"UPDATED"`
+	Created string `json:"CREATED"`
+	Deleted string `json:"DELETED"`
+}
+
 type AssetDetails struct {
-	Asset struct {
-		ID      int    `json:"ID"`
-		Tag     string `json:"TAG"`
-		State   AssetState
-		Status  string `json:"STATUS"`
-		Type    string `json:"TYPE"`
-		Updated string `json:"UPDATED"`
-		Created string `json:"CREATED"`
-		Deleted string `json:"DELETED"`
-	} `json:"ASSET"`
+	Asset      AssetCommon                  `json:"ASSET"`
 	Attributes map[string]map[string]string `json:"ATTRIBS"`
 	IPMI       struct {
 		Address  string `json:"IPMI_ADDRESS"`
@@ -152,6 +159,21 @@ func (c *Client) GetAsset(tag string) (*Asset, error) {
 	}
 	asset := &Asset{}
 	return asset, json.Unmarshal(body, &asset)
+}
+
+func (c *Client) GetAssetFromAddress(addr string) (*Asset, error) {
+	body, err := c.Request("GET", "/asset/with/address/"+addr, nil)
+	if err != nil {
+		return nil, err
+	}
+	if body == nil {
+		return nil, nil
+	}
+	asset := &AssetFlat{}
+	if err := json.Unmarshal(body, &asset); err != nil {
+		return nil, err
+	}
+	return c.GetAsset(asset.Data.Tag)
 }
 
 func (c *Client) FindAllAssets() (*Assets, error) {
