@@ -13,6 +13,12 @@ const (
 	defaultMaxSize = "500"
 )
 
+var defaultParams = &url.Values{}
+
+func init() {
+	defaultParams.Set("size", defaultMaxSize)
+}
+
 type AssetState struct {
 	ID     int `json:"ID"`
 	Status struct {
@@ -100,12 +106,6 @@ func New(user, password, url string) *Client {
 }
 
 func (c *Client) Request(method string, path string, params *url.Values) ([]byte, error) {
-	if params == nil {
-		params = &url.Values{}
-	}
-	if params.Get("size") == "" {
-		params.Set("size", defaultMaxSize)
-	}
 	url := c.url + path
 	if params != nil {
 		url = url + "?" + params.Encode()
@@ -138,7 +138,7 @@ func (c *Client) Request(method string, path string, params *url.Values) ([]byte
 }
 
 func (c *Client) GetAssetAddresses(tag string) (*AssetAddresses, error) {
-	body, err := c.Request("GET", "/asset/"+tag+"/addresses", nil)
+	body, err := c.Request("GET", "/asset/"+tag+"/addresses", defaultParams)
 	if err != nil {
 		return nil, err
 	}
@@ -177,10 +177,13 @@ func (c *Client) GetAssetFromAddress(addr string) (*Asset, error) {
 }
 
 func (c *Client) FindAllAssets() (*Assets, error) {
-	return c.FindAssets(nil)
+	return c.FindAssets(defaultParams)
 }
 
 func (c *Client) FindAssets(params *url.Values) (*Assets, error) {
+	if params.Get("size") == "" {
+		params.Set("size", defaultMaxSize)
+	}
 	body, err := c.Request("GET", "/assets", params)
 	if err != nil {
 		return nil, err
