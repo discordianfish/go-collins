@@ -123,16 +123,12 @@ func (c *Client) Request(method string, path string, params *url.Values) ([]byte
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, nil
-	}
-
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("Error %d: %s", resp.StatusCode, body)
+		return body, fmt.Errorf("Error %d: %s", resp.StatusCode, body)
 	}
 	return body, nil
 }
