@@ -116,6 +116,7 @@ func (c *Client) Request(method string, path string, params *url.Values) ([]byte
 	}
 	log.Printf("> %s", req.URL)
 	req.SetBasicAuth(c.user, c.password)
+	req.Close = true
 
 	resp, err := c.client.Do(req)
 	if err != nil {
