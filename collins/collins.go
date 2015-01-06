@@ -89,6 +89,16 @@ type Assets struct {
 	} `json:"Data"`
 }
 
+// Error implements the error interface
+type Error struct {
+	err        string
+	StatusCode int
+}
+
+func (e Error) Error() string {
+	return fmt.Sprintf("%d/%s: %s", e.StatusCode, http.StatusText(e.StatusCode), e.err)
+}
+
 type Client struct {
 	client   *http.Client
 	user     string
@@ -129,7 +139,7 @@ func (c *Client) Request(method string, path string, params *url.Values) ([]byte
 		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 400 {
-		return body, fmt.Errorf("Error %d: %s", resp.StatusCode, body)
+		return body, Error{err: string(body), StatusCode: resp.StatusCode}
 	}
 	return body, nil
 }
@@ -149,10 +159,12 @@ func (c *Client) GetAsset(tag string) (*Asset, error) {
 	}
 	body, err := c.Request("GET", "/asset/"+tag, nil)
 	if err != nil {
+		if cerr, ok := err.(Error); ok {
+			if cerr.StatusCode == http.StatusNotFound { // not an error, just no asset
+				return nil, nil
+			}
+		}
 		return nil, err
-	}
-	if body == nil {
-		return nil, nil
 	}
 	asset := &Asset{}
 	return asset, json.Unmarshal(body, &asset)
